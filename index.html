@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Méridien — un carnet d'intention. Une question par jour. Relié, pas dématérialisé.">
+<title>Méridien</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="day">
+
+<a class="skip-link" href="#entry">Aller à la saisie</a>
+
+<header class="site-head" id="site-head">
+  <div class="wrap">
+    <div class="brand-row">
+      <div>
+        <a class="wordmark" href="#/">Méridien</a>
+        <p class="tagline">Un carnet d’intention. Une question par jour.</p>
+      </div>
+      <button id="theme-toggle" class="btn btn-ghost btn-small" type="button" aria-pressed="false">Encre de nuit</button>
+    </div>
+    <nav class="tabs" aria-label="Vues">
+      <a href="#/" data-nav="/" class="tab" aria-current="page">Aujourd’hui <kbd>1</kbd></a>
+      <a href="#/archive" data-nav="/archive" class="tab">Archive <kbd>2</kbd></a>
+      <a href="#/stats" data-nav="/stats" class="tab">Statistiques <kbd>3</kbd></a>
+      <a href="#/annee" data-nav="/annee" class="tab">Année <kbd>4</kbd></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+  <!-- Vue 1 — Aujourd'hui -->
+  <section id="view-today" class="view" aria-labelledby="today-date">
+    <div class="page-sheet" id="today-page">
+      <div class="page-holes" aria-hidden="true"></div>
+      <div class="page-spiral" aria-hidden="true"></div>
+
+      <div class="carnet-tabs" id="carnet-tabs" role="tablist" aria-orientation="vertical" aria-label="Carnets"></div>
+
+      <p class="date-caps" id="today-date">…</p>
+      <h1 class="question" id="today-question">…</h1>
+
+      <div class="question-row">
+        <button id="change-question" class="btn btn-ghost btn-small" type="button">Changer de question</button>
+        <label class="rotation-toggle" for="rotation-toggle">
+          <input type="checkbox" id="rotation-toggle">
+          <span>Rotation quotidienne&nbsp;: <strong id="rotation-state">désactivée</strong></span>
+        </label>
+      </div>
+
+      <p class="edit-note" id="edit-note" hidden>Vous avez déjà écrit aujourd’hui. Modifier la page&nbsp;?</p>
+      <p class="carnet-fresh" id="carnet-fresh" hidden>Ce carnet est neuf. La première page est celle d’aujourd’hui.</p>
+
+      <label class="sr-only" for="entry">Votre réponse à la question du jour</label>
+      <textarea id="entry" class="entry" rows="4" placeholder="Quelques lignes suffisent…" autocomplete="off" spellcheck="true" aria-describedby="save-hint"></textarea>
+
+      <div class="tags-row">
+        <label class="sr-only" for="tags">Étiquettes, séparées par des virgules</label>
+        <input id="tags" class="tags-input" type="text" placeholder="tags (virgule)…" autocomplete="off" spellcheck="false">
+        <span class="tags-hint" aria-hidden="true">#idée #gratitude</span>
+      </div>
+
+      <div class="actions">
+        <button id="save-btn" class="btn btn-primary" type="button">Garder cette page</button>
+        <span class="hint" id="save-hint"><kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>↵</kbd></span>
+        <button id="new-carnet" class="btn btn-ghost" type="button">Nouveau carnet</button>
+        <button id="rename-carnet" class="btn btn-ghost btn-small" type="button">Renommer</button>
+        <button id="delete-carnet" class="btn btn-ghost btn-small btn-danger" type="button">Supprimer le carnet</button>
+      </div>
+
+      <p class="feedback" id="save-feedback" role="status" aria-live="polite"></p>
+      <div class="stamp stamp--saved" id="saved-stamp" hidden aria-hidden="true">GARDÉ</div>
+    </div>
+  </section>
+
+  <!-- Vue 2 — Archive -->
+  <section id="view-archive" class="view" aria-labelledby="month-label" hidden>
+    <p class="view-context" id="archive-context">Carnet — …</p>
+    <div class="archive-head">
+      <button id="prev-month" class="btn btn-icon" type="button" aria-label="Mois précédent">‹</button>
+      <h2 class="month-label" id="month-label">…</h2>
+      <button id="next-month" class="btn btn-icon" type="button" aria-label="Mois suivant">›</button>
+    </div>
+
+    <p class="legend">Chaque case est une page.</p>
+
+    <div class="week-row" aria-hidden="true">
+      <span>lun</span><span>mar</span><span>mer</span><span>jeu</span><span>ven</span><span>sam</span><span>dim</span>
+    </div>
+    <div id="calendar" class="calendar" role="group" aria-label="Calendrier du mois"></div>
+
+    <p id="archive-empty" class="empty-state" hidden>Rien d’archivé pour l’instant. La première page est celle d’aujourd’hui.</p>
+  </section>
+
+  <!-- Vue Année — heatmap 53×7 -->
+  <section id="view-annee" class="view" aria-labelledby="annee-title" hidden>
+    <p class="view-context" id="annee-context">Carnet — …</p>
+    <h2 class="view-title" id="annee-title">L’année en pages</h2>
+
+    <div class="heatmap-scroll">
+      <div class="heatmap-months" id="heatmap-months" aria-hidden="true"></div>
+      <div class="heatmap" id="heatmap" role="group" aria-label="Chaque case est un jour : une case = une page"></div>
+    </div>
+
+    <div class="heatmap-legend" aria-hidden="true">
+      <span class="hm-legend-label">Une case = une page.</span>
+      <span class="hm-key"><span class="hm-cell hm-0"></span> 0</span>
+      <span class="hm-key"><span class="hm-cell hm-1"></span> 1–2</span>
+      <span class="hm-key"><span class="hm-cell hm-2"></span> 3–5</span>
+      <span class="hm-key"><span class="hm-cell hm-3"></span> 6+</span>
+    </div>
+
+    <p id="annee-empty" class="empty-state" hidden>L’année commence aujourd’hui.</p>
+  </section>
+
+  <!-- Vue 3 — Statistiques -->
+  <section id="view-stats" class="view" aria-labelledby="stats-title" hidden>
+    <h2 class="sr-only" id="stats-title">Statistiques</h2>
+
+    <div id="stats-body">
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num stat-num--ochre" id="streak-num">0</div>
+          <div class="stat-label">Jours consécutifs</div>
+          <p class="zero-note" id="streak-zero" hidden>0 — la série reprend aujourd’hui</p>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="total-num">0</div>
+          <div class="stat-label">Total de pages</div>
+        </div>
+      </div>
+
+      <p class="longest">Plus longue série — <span id="longest-num" class="tabular">0</span></p>
+      <p class="longest">Meilleure période — <span id="best-period" class="tabular">—</span></p>
+
+      <div class="stat-block">
+        <h3 class="stat-block-title">Par carnet</h3>
+        <div id="by-carnet" class="bar-list"></div>
+      </div>
+
+      <div class="stat-block">
+        <h3 class="stat-block-title">Par jour de la semaine</h3>
+        <div id="by-weekday" class="weekday-bars" role="img" aria-label="Répartition des pages par jour de la semaine"></div>
+      </div>
+
+      <div class="actions">
+        <button id="export-btn" class="btn btn-ghost" type="button">Exporter (.json)</button>
+        <button id="import-btn" class="btn btn-ghost" type="button">Restaurer une archive</button>
+        <span class="hint"><kbd>E</kbd> exporte</span>
+      </div>
+      <input id="import-file" type="file" accept="application/json,.json" class="sr-only" aria-hidden="true" tabindex="-1">
+      <p class="feedback" id="export-feedback" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="stat-block cloud-block" aria-labelledby="cloud-title">
+      <h3 class="stat-block-title" id="cloud-title">Sauvegarde cloud</h3>
+      <p class="cloud-sub">Chiffrée sur cet appareil avant envoi. Le serveur ne voit jamais le clair.</p>
+      <label class="sr-only" for="cloud-passphrase">Passphrase du carnet</label>
+      <input id="cloud-passphrase" class="overlay-input cloud-input" type="password" placeholder="Passphrase du carnet…" autocomplete="off" spellcheck="false">
+      <div class="actions">
+        <button id="cloud-save-btn" class="btn btn-ghost" type="button">Sauvegarder dans le cloud</button>
+        <button id="cloud-restore-btn" class="btn btn-ghost" type="button">Restaurer depuis le cloud</button>
+      </div>
+      <p class="feedback" id="cloud-feedback" role="status" aria-live="polite"></p>
+    </div>
+
+    <p id="stats-empty" class="empty-state" hidden>Vos statistiques apparaîtront après votre première réponse.</p>
+  </section>
+
+  <!-- Onboarding — 3 écrans -->
+  <section id="view-bienvenue" class="view view-onboarding" aria-labelledby="ob-title-1" hidden>
+    <div class="ob-frame" id="ob-screen-1">
+      <div class="ob-art ob-art--spiral" aria-hidden="true">
+        <div class="ob-page"><div class="ob-rings"><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+      </div>
+      <p class="ob-step">1 / 3</p>
+      <h1 class="ob-title" id="ob-title-1">Ceci est un carnet, pas une appli.</h1>
+      <p class="ob-sub">Une question par jour. Quelques lignes. Rien d’autre.</p>
+      <button class="btn btn-primary ob-cta" type="button" data-ob-next="2">Ouvrir le carnet</button>
+    </div>
+
+    <div class="ob-frame" id="ob-screen-2" hidden>
+      <div class="ob-art ob-art--tabs" aria-hidden="true">
+        <div class="ob-page ob-page--tabs"><span class="ob-tab ob-tab--1"></span><span class="ob-tab ob-tab--2"></span><span class="ob-tab ob-tab--3"></span></div>
+      </div>
+      <p class="ob-step">2 / 3</p>
+      <h1 class="ob-title">Choisissez vos carnets.</h1>
+      <p class="ob-sub">Intention, Idées, Gratitude… chaque carnet a son onglet et sa question.</p>
+      <label class="sr-only" for="ob-carnet-name">Nom du premier carnet</label>
+      <input id="ob-carnet-name" class="ob-input" type="text" value="Intention" placeholder="Nom du carnet…" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary ob-cta" type="button" id="ob-create-carnet">Créer mon premier carnet</button>
+    </div>
+
+    <div class="ob-frame" id="ob-screen-3" hidden>
+      <div class="ob-art ob-art--tampon" aria-hidden="true">
+        <div class="ob-stamp">GARDÉ</div>
+      </div>
+      <p class="ob-step">3 / 3</p>
+      <h1 class="ob-title">Tout reste ici.</h1>
+      <p class="ob-sub">Aucune donnée ne sort de ce navigateur. Exportez quand vous voulez.</p>
+      <button class="btn btn-primary ob-cta" type="button" id="ob-finish">Écrire la première page</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Détail plein écran d'une page -->
+<div id="detail-overlay" class="detail-overlay" role="dialog" aria-modal="true" aria-labelledby="detail-date" hidden>
+  <div class="detail-inner">
+    <button id="detail-close" class="btn btn-icon detail-close" type="button" aria-label="Fermer le détail">✕</button>
+    <p class="date-caps" id="detail-date">…</p>
+    <p class="detail-carnet" id="detail-carnet"><span class="carnet-dot" id="detail-carnet-dot"></span><span id="detail-carnet-name">…</span></p>
+    <p class="question question--small" id="detail-question">…</p>
+    <div class="detail-cover-wrap">
+      <canvas id="detail-cover" class="detail-cover" width="360" height="480" role="img" aria-label="Couverture de la page"></canvas>
+      <div class="stamp" id="detail-stamp" aria-hidden="true">GARDÉ</div>
+    </div>
+    <p class="detail-text" id="detail-text"></p>
+    <p class="detail-tags" id="detail-tags"></p>
+  </div>
+</div>
+
+<!-- Recherche plein texte ( / ) -->
+<div id="search-overlay" class="overlay search-overlay" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
+  <div class="overlay-inner">
+    <h2 class="sr-only" id="search-title">Recherche dans les pages</h2>
+    <label class="sr-only" for="search-input">Chercher dans les pages…</label>
+    <input id="search-input" class="overlay-input" type="text" placeholder="Chercher dans les pages…" autocomplete="off" spellcheck="false">
+    <p class="overlay-meta" id="search-meta" role="status"></p>
+    <ul id="search-results" class="result-list" role="listbox" aria-label="Résultats"></ul>
+    <p id="search-empty" class="empty-state" hidden>Aucune page. Essayez un mot plus simple.</p>
+    <p class="overlay-foot"><kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>↵</kbd> ouvrir · <kbd>Échap</kbd> fermer</p>
+  </div>
+</div>
+
+<!-- Command palette (Cmd/Ctrl+K) -->
+<div id="palette" class="overlay palette-overlay" role="dialog" aria-modal="true" aria-labelledby="palette-title" hidden>
+  <div class="overlay-inner overlay-inner--narrow">
+    <h2 class="sr-only" id="palette-title">Commandes</h2>
+    <label class="sr-only" for="palette-input">Que voulez-vous faire&nbsp;?</label>
+    <input id="palette-input" class="overlay-input" type="text" placeholder="Que voulez-vous faire ?" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-activedescendant="">
+    <ul id="palette-list" class="result-list palette-list" role="listbox" aria-label="Actions"></ul>
+    <p class="overlay-foot"><kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>↵</kbd> choisir · <kbd>Échap</kbd> fermer</p>
+  </div>
+</div>
+
+<!-- Modales : carnet / supprimer / question / import -->
+<div id="carnet-modal" class="overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="carnet-modal-title" hidden>
+  <div class="modal-inner">
+    <h2 class="modal-title" id="carnet-modal-title">Nouveau carnet</h2>
+    <label class="sr-only" for="carnet-name">Nom du carnet</label>
+    <input id="carnet-name" class="overlay-input" type="text" placeholder="Nom du carnet…" autocomplete="off" spellcheck="false">
+    <div class="modal-actions">
+      <button id="carnet-modal-cancel" class="btn btn-ghost" type="button">Garder l’existant</button>
+      <button id="carnet-modal-confirm" class="btn btn-primary" type="button">Créer</button>
+    </div>
+  </div>
+</div>
+
+<div id="delete-modal" class="overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" hidden>
+  <div class="modal-inner">
+    <h2 class="modal-title" id="delete-modal-title">Supprimer ce carnet et ses pages&nbsp;?</h2>
+    <p class="modal-sub" id="delete-modal-sub">Cette action ne peut pas être annulée.</p>
+    <div class="modal-actions">
+      <button id="delete-modal-keep" class="btn btn-ghost" type="button">Garder</button>
+      <button id="delete-modal-confirm" class="btn btn-primary btn-danger-solid" type="button">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="question-modal" class="overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="question-modal-title" hidden>
+  <div class="modal-inner modal-inner--wide">
+    <h2 class="modal-title" id="question-modal-title">La question de ce carnet</h2>
+    <ul id="question-list" class="question-list" role="listbox" aria-label="Questions"></ul>
+    <div class="question-custom">
+      <label class="sr-only" for="question-custom-input">Question personnalisée</label>
+      <input id="question-custom-input" class="overlay-input" type="text" placeholder="Écrire ma propre question…" autocomplete="off" spellcheck="true">
+      <button id="question-custom-add" class="btn btn-ghost" type="button">Ajouter</button>
+    </div>
+    <div class="modal-actions">
+      <button id="question-modal-close" class="btn btn-primary" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="import-modal" class="overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" hidden>
+  <div class="modal-inner">
+    <h2 class="modal-title" id="import-modal-title">Remplacer les données actuelles par l’archive&nbsp;?</h2>
+    <p class="modal-sub" id="import-modal-sub">L’archive sera validée avant toute écriture.</p>
+    <div class="modal-actions modal-actions--three">
+      <button id="import-modal-cancel" class="btn btn-ghost" type="button">Annuler</button>
+      <button id="import-modal-merge" class="btn btn-ghost" type="button">Fusionner</button>
+      <button id="import-modal-replace" class="btn btn-primary" type="button">Remplacer</button>
+    </div>
+  </div>
+</div>
+
+<div id="restore-modal" class="overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="restore-modal-title" hidden>
+  <div class="modal-inner">
+    <h2 class="modal-title" id="restore-modal-title">Remplacer les données actuelles par la sauvegarde cloud&nbsp;?</h2>
+    <p class="modal-sub" id="restore-modal-sub">La sauvegarde sera validée avant toute écriture.</p>
+    <div class="modal-actions">
+      <button id="restore-modal-cancel" class="btn btn-ghost" type="button">Annuler</button>
+      <button id="restore-modal-replace" class="btn btn-primary" type="button">Remplacer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- Journal imprimable — une page = un jour -->
+<section id="print-log" class="print-only" aria-hidden="true"></section>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p><kbd>1</kbd> Aujourd’hui · <kbd>2</kbd> Archive · <kbd>3</kbd> Statistiques · <kbd>4</kbd> Année · <kbd>/</kbd> Chercher · <kbd>⌘K</kbd> Palette · <kbd>Échap</kbd> Fermer</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

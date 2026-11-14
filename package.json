@@ -1,0 +1,9 @@
+{
+  "name": "meridien",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Méridien — carnet d'intention. Vanilla JS, zéro build, sauvegarde cloud chiffrée côté client.",
+  "dependencies": {
+    "@vercel/blob": "^2.9.0"
+  }
+}
